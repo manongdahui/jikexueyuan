@@ -11,18 +11,15 @@ sys.path.append(CON_GEN_PY)
 from jikexueyuan import RecomService
 from jikexueyuan.ttypes import *
 
-#client=None
-#transport=None
+client=None
+transport=None
 def init():
-  try:
-    transport = TSocket.TSocket('localhost', 9090)  
-    transport = TTransport.TBufferedTransport(transport)  
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)  
-    client = RecomService.Client(protocol)  
-    transport.open()
-  except Exception, e:  
-    print '%r' % e 
-  print client 
+  global client,transport
+  transport = TSocket.TSocket('localhost', 9090)  
+  transport = TTransport.TBufferedTransport(transport)  
+  protocol = TBinaryProtocol.TBinaryProtocol(transport)  
+  client = RecomService.Client(protocol)  
+  transport.open()
   
 def application(environ, start_response):
   ret = "TEST\n" 
@@ -35,9 +32,9 @@ def application(environ, start_response):
   rreq.userid = arg_dict.get('userid',['unknow'])[0]
   rreq.his_list = arg_dict.get('history',[''])[0].split('-')
   rreq.num = int(arg_dict.get('num',[10])[0])
+  global client
   rres = client.getRecomResponse(rreq)
-  print rres
-  return [ret]
+  return [ret+json.dumps(rres.recom_list)]
       
 if __name__ == "__main__":
   init()
